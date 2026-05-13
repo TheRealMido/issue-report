@@ -211,6 +211,8 @@ if __name__ == '__main__':
     # Use a try-except block to handle connection errors gracefully
     with app.app_context():
         try:
+            # Create tables if they don't exist
+            db.create_all()
             # Check if we can connect
             db.engine.connect()
             print("Successfully connected to the database!")
