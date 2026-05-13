@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <h1 class="form-title">Report an Issue</h1>
+        <p class="form-subtitle">Provide details about the maintenance issue you've noticed.</p>
+
+        <form action="/submit" method="POST" class="report-form">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" placeholder="e.g., Broken street light, Pothole" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category_id" required>
+                        <option value="" disabled selected>Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Main St & 5th Ave" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" placeholder="Describe the issue in detail..." required></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="/" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-container { max-width: 800px; margin: 0 auto; }
+.form-card { background: white; padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+.form-title { font-size: 2rem; margin-bottom: 0.5rem; }
+.form-subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main); }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+.btn-secondary { background: #f1f5f9; color: var(--text-main); text-decoration: none; display: inline-block; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; }
+.btn-secondary:hover { background: #e2e8f0; }
+</style>
+
+<script>
+document.querySelector('.report-form').addEventListener('submit', function() {
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Submitting...';
+});
+</script>
+{% endblock %}

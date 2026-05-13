@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">Manage and update the status of community issues.</p>
+    </div>
+</div>
+
+<div class="admin-table-container">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Date Submitted</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr>
+                <td>#{{ issue.issue_id }}</td>
+                <td class="table-title">
+                    <a href="javascript:void(0)" class="issue-detail-link" 
+                       data-id="{{ issue.issue_id }}" 
+                       data-title="{{ issue.title }}" 
+                       data-desc="{{ issue.description }}" 
+                       data-reporter="{{ issue.user.name }} ({{ issue.user.email }})" 
+                       data-category="{{ issue.category.name if issue.category else 'N/A' }}" 
+                       data-location="{{ issue.location }}" 
+                       data-date="{{ issue.date_submitted.strftime('%b %d, %Y') }}" 
+                       data-status="{{ issue.status }}"
+                       data-voters="{% for v in issue.votes %}{{ v.user.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
+                       onclick="openIssueModal(this)">
+                        {{ issue.title }}
+                    </a>
+                </td>
+                <td>{{ issue.category.name if issue.category else 'N/A' }}</td>
+                <td>{{ issue.location }}</td>
+                <td>{{ issue.date_submitted.strftime('%b %d, %Y') }}</td>
+                <td>
+                    <span class="status-tag status-{{ issue.status.lower().replace(' ', '-') }}">
+                        {{ issue.status }}
+                    </span>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-small" 
+                            onclick="openConfirmModal('{{ issue.issue_id }}', '{{ issue.status }}')">
+                        Update Status
+                    </button>
+                    <!-- Small indicator for existing notes -->
+                    {% if issue.status_updates %}
+                        <div style="font-size: 0.75rem; color: var(--accent); margin-top: 0.25rem;">
+                            {{ issue.status_updates|length }} updates logged
+                        </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="empty-state" style="padding: 3rem;">No issues found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Background -->
+<div id="issueModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Issue Title</h2>
+            <span class="close-btn" onclick="closeIssueModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Reporter:</span>
+                    <span id="modalReporter"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Category:</span>
+                    <span id="modalCategory"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date Submitted:</span>
+                    <span id="modalDate"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Location:</span>
+                    <span id="modalLocation"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span id="modalStatus"></span>
+                </div>
+            </div>
+            <div class="description-section">
+                <span class="info-label">Description:</span>
+                <p id="modalDescription"></p>
+            </div>
+            <div class="voters-section" style="margin-top: 1.5rem;">
+                <span class="info-label">Voters:</span>
+                <div id="modalVoters" class="voters-list" style="margin-top: 0.5rem; font-size: 0.9rem; color: #cbd5e1; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-table-container {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+.admin-table th, .admin-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-table th {
+    background: rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+.table-title {
+    font-weight: 600;
+    color: var(--text-main);
+}
+.issue-detail-link {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+    border-bottom: 1px dashed var(--primary);
+    cursor: pointer;
+}
+.issue-detail-link:hover {
+    color: var(--primary-hover);
+    border-bottom: 1px dashed var(--primary-hover);
+}
+.status-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+.status-select {
+    padding: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+.status-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.6); 
+    backdrop-filter: blur(8px);
+    overflow: auto; 
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background-color: var(--bg-main);
+    background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(11, 15, 25, 0.95));
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    animation: fadeInModal 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+.modal-header h2 {
+    font-family: 'Outfit', sans-serif;
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+.close-btn {
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+.close-btn:hover {
+    color: white;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.info-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+.description-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.description-section p {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+@keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+</style>
+
+<script>
+function openIssueModal(element) {
+    document.getElementById('modalTitle').textContent = element.getAttribute('data-title');
+    document.getElementById('modalReporter').textContent = element.getAttribute('data-reporter');
+    document.getElementById('modalCategory').textContent = element.getAttribute('data-category');
+    document.getElementById('modalDate').textContent = element.getAttribute('data-date');
+    document.getElementById('modalLocation').textContent = element.getAttribute('data-location');
+    document.getElementById('modalStatus').textContent = element.getAttribute('data-status');
+    document.getElementById('modalDescription').textContent = element.getAttribute('data-desc') || 'No description provided.';
+    
+    const voters = element.getAttribute('data-voters');
+    const votersContainer = document.getElementById('modalVoters');
+    if (voters && voters.trim() !== "") {
+        votersContainer.textContent = voters;
+    } else {
+        votersContainer.textContent = "No votes yet.";
+    }
+    
+    var modal = document.getElementById('issueModal');
+    modal.style.display = 'flex';
+}
+
+function closeIssueModal() {
+    var modal = document.getElementById('issueModal');
+    modal.style.display = 'none';
+}
+
+// Close when clicking outside of modal content
+window.onclick = function(event) {
+    var modal = document.getElementById('issueModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+<!-- Status Update Confirmation Modal -->
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2>Update Issue Status</h2>
+            <span class="close-btn" onclick="closeConfirmModal()">&times;</span>
+        </div>
+        <form id="updateStatusForm" method="POST">
+            <div class="modal-body">
+                <div class="info-item" style="margin-bottom: 1.5rem;">
+                    <span class="info-label">New Status:</span>
+                    <select name="status" class="status-select" style="width: 100%; margin-top: 0.5rem;" required>
+                        {% for status in statuses %}
+                        <option value="{{ status }}">{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="info-item" style="margin-bottom: 1.5rem;">
+                    <span class="info-label">Admin Note:</span>
+                    <textarea name="note" class="status-select" 
+                              style="width: 100%; min-height: 100px; margin-top: 0.5rem; resize: vertical;" 
+                              placeholder="Reason for change, internal notes, etc..." required></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn" style="background: rgba(255,255,255,0.05); color: white;" onclick="closeConfirmModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm & Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+
+function openConfirmModal(issueId, currentStatus) {
+    const form = document.getElementById('updateStatusForm');
+    form.action = `/admin/update_status/${issueId}`;
+    
+    // Pre-select current status
+    const select = form.querySelector('select[name="status"]');
+    select.value = currentStatus;
+    
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Community Issues</h1>
+        <p class="page-subtitle">Track and upvote maintenance reports in your neighborhood.</p>
+    </div>
+    <a href="/submit" class="btn btn-primary">+ Report New Issue</a>
+</div>
+
+<div class="filters">
+    <!-- Categories will go here -->
+    <button class="filter-chip active">All</button>
+    {% for category in categories %}
+    <button class="filter-chip">{{ category.name }}</button>
+    {% endfor %}
+</div>
+
+<div class="issue-grid">
+    {% for issue in issues %}
+    <div class="issue-card" data-category="{{ issue.category.name if issue.category else 'N/A' }}">
+        <div class="issue-header">
+            <span class="status-tag status-{{ issue.status.lower().replace(' ', '-') }}">
+                {{ issue.status }}
+            </span>
+            <span class="location-tag">📍 {{ issue.location }}</span>
+        </div>
+        <h3 class="issue-title">{{ issue.title }}</h3>
+        <p class="issue-desc">{{ issue.description }}</p>
+        <div class="issue-footer">
+            <span class="date">{{ issue.date_submitted.strftime('%b %d, %Y') }}</span>
+            <button class="vote-btn" data-issue-id="{{ issue.issue_id }}">
+                <span class="vote-icon">▲</span>
+                <span class="vote-count">{{ issue.votes|length if issue.votes else 0 }}</span>
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No issues reported yet. Be the first!</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+}
+.page-title { font-size: 2.5rem; color: var(--text-main); margin-bottom: 0.5rem; }
+.page-subtitle { color: var(--text-muted); font-size: 1.1rem; }
+.filters { display: flex; gap: 0.75rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem; }
+.filter-chip {
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+.filter-chip:hover, .filter-chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+.location-tag { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 5rem;
+    background: white;
+    border-radius: var(--radius);
+    border: 2px dashed #e2e8f0;
+    color: var(--text-muted);
+}
+</style>
+{% endblock %}
