@@ -31,14 +31,21 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# MySQL Configuration
-# Format: mysql+pymysql://DB_USER:DB_PASSWORD@DB_HOST/DB_NAME
-DB_USER = os.getenv('DB_USER', 'root')
-DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+# Database Configuration
+# Primary: MySQL (if credentials provided)
+# Fallback: SQLite (for easy portability/deployment)
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST', 'localhost')
 DB_NAME = os.getenv('DB_NAME', 'issue_reporter')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
+if DB_USER and DB_NAME:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
+else:
+    # Use SQLite if MySQL is not configured
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///issue_reporter.db'
+    print("MySQL not configured. Falling back to SQLite.")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
