@@ -43,8 +43,12 @@ if DB_USER and DB_NAME:
     app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
 else:
     # Use SQLite if MySQL is not configured
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///issue_reporter.db'
-    print("MySQL not configured. Falling back to SQLite.")
+    # On Vercel, we must use /tmp for write access
+    if os.getenv('VERCEL'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/issue_reporter.db'
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///issue_reporter.db'
+    print(f"MySQL not configured. Using SQLite at {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
