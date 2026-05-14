@@ -218,16 +218,16 @@ def seed_db():
         db.session.commit()
         print("Database seeded with default values.")
 
+# Database Initialization for all environments (including Vercel)
+with app.app_context():
+    try:
+        # Create tables if they don't exist
+        db.create_all()
+        # Seed default data
+        seed_db()
+        print("Database initialized and seeded.")
+    except Exception as e:
+        print(f"Warning: Could not initialize database: {e}")
+
 if __name__ == '__main__':
-    # Use a try-except block to handle connection errors gracefully
-    with app.app_context():
-        try:
-            # Create tables if they don't exist
-            db.create_all()
-            # Check if we can connect
-            db.engine.connect()
-            print("Successfully connected to the database!")
-        except Exception as e:
-            print(f"Warning: Could not connect to database. Make sure your credentials in .env are correct. Error: {e}")
-            
     app.run(debug=True, port=5000)
