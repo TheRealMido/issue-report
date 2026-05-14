@@ -21,7 +21,7 @@ class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    role = db.Column(db.Enum('resident', 'admin'), nullable=False, default='resident')
+    role = db.Column(db.Enum('resident', 'admin', name='user_roles'), nullable=False, default='resident')
 
     def get_id(self):
         return str(self.user_id)
@@ -39,7 +39,7 @@ class Issue(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('Categories.category_id'))
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'))
     location = db.Column(db.String(100))
-    status = db.Column(db.Enum('Submitted', 'Under Review', 'In Progress', 'Resolved', 'Rejected'), default='Submitted')
+    status = db.Column(db.Enum('Submitted', 'Under Review', 'In Progress', 'Resolved', 'Rejected', name='issue_statuses'), default='Submitted')
     date_submitted = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
