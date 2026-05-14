@@ -32,23 +32,27 @@ def admin_required(f):
     return decorated_function
 
 # Database Configuration
-# Primary: MySQL (if credentials provided)
-# Fallback: SQLite (for easy portability/deployment)
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST', 'localhost')
 DB_NAME = os.getenv('DB_NAME', 'issue_reporter')
+POSTGRES_URL = os.getenv('POSTGRES_URL')
 
-if DB_USER and DB_NAME:
+if POSTGRES_URL:
+    # Vercel Postgres provides postgres://... but SQLAlchemy needs postgresql://...
+    if POSTGRES_URL.startswith("postgres://"):
+        POSTGRES_URL = POSTGRES_URL.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = POSTGRES_URL
+elif DB_USER and DB_NAME:
     app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}'
 else:
-    # Use SQLite if MySQL is not configured
-    # On Vercel, we must use /tmp for write access
+    # Use SQLite if NO remote database is configured
+    # On Vercel, we must use /tmp for write access if no remote DB is linked
     if os.getenv('VERCEL'):
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/issue_reporter.db'
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///issue_reporter.db'
-    print(f"MySQL not configured. Using SQLite at {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"No remote database. Using SQLite at {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
