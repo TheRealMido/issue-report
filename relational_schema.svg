@@ -1,0 +1,105 @@
+<svg width="850" height="650" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f4f7f6" />
+  <style>
+    .table-box { fill: white; stroke: #333; stroke-width: 1.5; }
+    .table-header { fill: #e1e8e5; stroke: #333; stroke-width: 1.5; }
+    .text { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 13px; fill: #2c3e50; }
+    .header-text { font-family: 'Segoe UI', Arial; font-size: 14px; font-weight: bold; fill: #1a252f; }
+    .pk { text-decoration: underline; font-weight: bold; }
+    .fk { font-style: italic; color: #7f8c8d; }
+    .arrow { fill: none; stroke: #d35400; stroke-width: 2; marker-end: url(#arrowhead); opacity: 0.8; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d35400" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="50" y="30" class="header-text" style="font-size: 18px;">Relational Schema Diagram - Issue Reporter</text>
+
+  <!-- USERS Table -->
+  <g transform="translate(50, 70)">
+    <rect x="0" y="0" width="360" height="25" class="table-header" />
+    <text x="10" y="17" class="header-text">USERS</text>
+    <rect x="0" y="25" width="90" height="30" class="table-box" />
+    <text x="10" y="44" class="text pk">user_id</text>
+    <rect x="90" y="25" width="90" height="30" class="table-box" />
+    <text x="100" y="44" class="text">name</text>
+    <rect x="180" y="25" width="90" height="30" class="table-box" />
+    <text x="190" y="44" class="text">email</text>
+    <rect x="270" y="25" width="90" height="30" class="table-box" />
+    <text x="280" y="44" class="text">role</text>
+  </g>
+
+  <!-- CATEGORIES Table -->
+  <g transform="translate(50, 170)">
+    <rect x="0" y="0" width="180" height="25" class="table-header" />
+    <text x="10" y="17" class="header-text">CATEGORIES</text>
+    <rect x="0" y="25" width="90" height="30" class="table-box" />
+    <text x="10" y="44" class="text pk">category_id</text>
+    <rect x="90" y="25" width="90" height="30" class="table-box" />
+    <text x="100" y="44" class="text">name</text>
+  </g>
+
+  <!-- ISSUES Table -->
+  <g transform="translate(50, 270)">
+    <rect x="0" y="0" width="630" height="25" class="table-header" />
+    <text x="10" y="17" class="header-text">ISSUES</text>
+    <rect x="0" y="25" width="90" height="30" class="table-box" />
+    <text x="10" y="44" class="text pk">issue_id</text>
+    <rect x="90" y="25" width="90" height="30" class="table-box" />
+    <text x="100" y="44" class="text">*cat_id*</text>
+    <rect x="180" y="25" width="90" height="30" class="table-box" />
+    <text x="190" y="44" class="text">*user_id*</text>
+    <rect x="270" y="25" width="90" height="30" class="table-box" />
+    <text x="280" y="44" class="text">title</text>
+    <rect x="360" y="25" width="90" height="30" class="table-box" />
+    <text x="370" y="44" class="text">location</text>
+    <rect x="450" y="25" width="90" height="30" class="table-box" />
+    <text x="460" y="44" class="text">status</text>
+    <rect x="540" y="25" width="90" height="30" class="table-box" />
+    <text x="550" y="44" class="text">date</text>
+  </g>
+
+  <!-- VOTES Table -->
+  <g transform="translate(50, 400)">
+    <rect x="0" y="0" width="270" height="25" class="table-header" />
+    <text x="10" y="17" class="header-text">VOTES</text>
+    <rect x="0" y="25" width="90" height="30" class="table-box" />
+    <text x="10" y="44" class="text pk">vote_id</text>
+    <rect x="90" y="25" width="90" height="30" class="table-box" />
+    <text x="100" y="44" class="text">*user_id*</text>
+    <rect x="180" y="25" width="90" height="30" class="table-box" />
+    <text x="190" y="44" class="text">*issue_id*</text>
+  </g>
+
+  <!-- STATUS_UPDATES Table -->
+  <g transform="translate(50, 500)">
+    <rect x="0" y="0" width="360" height="25" class="table-header" />
+    <text x="10" y="17" class="header-text">STATUS_UPDATES</text>
+    <rect x="0" y="25" width="90" height="30" class="table-box" />
+    <text x="10" y="44" class="text pk">update_id</text>
+    <rect x="90" y="25" width="90" height="30" class="table-box" />
+    <text x="100" y="44" class="text">*issue_id*</text>
+    <rect x="180" y="25" width="180" height="30" class="table-box" />
+    <text x="190" y="44" class="text">note / status changes</text>
+  </g>
+
+  <!-- ARROWS (FK -> PK) -->
+  <!-- ISSUES.user_id -> USERS.user_id -->
+  <path d="M 230 295 C 230 180 90 180 90 120" class="arrow" />
+  
+  <!-- ISSUES.cat_id -> CATEGORIES.category_id -->
+  <path d="M 140 295 C 140 240 90 240 90 220" class="arrow" />
+
+  <!-- VOTES.user_id -> USERS.user_id -->
+  <path d="M 140 425 C 20 425 20 120 45 95" class="arrow" />
+  
+  <!-- VOTES.issue_id -> ISSUES.issue_id -->
+  <path d="M 230 425 C 750 425 750 295 150 295" class="arrow" />
+
+  <!-- STATUS_UPDATES.issue_id -> ISSUES.issue_id -->
+  <path d="M 140 525 C 40 525 40 320 45 295" class="arrow" />
+
+</svg>
